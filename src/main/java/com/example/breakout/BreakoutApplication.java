@@ -25,9 +25,9 @@ public class BreakoutApplication {
                             Model model) {
         System.out.println("Player: " + name + ", Difficulty: " + difficulty);
         String txt = "";
-        if (difficulty == "Easy") {
+        if (difficulty.equals("Easy")) {
         	txt = "You are a chicken!";
-        } else if (difficulty == "Masochist") {
+        } else if (difficulty.equals("Masochist")) {
         	txt = "You must be mental!";
         }
         model.addAttribute("message", "Welcome " + name + "! You selected " + difficulty + " difficulty. " + txt);
