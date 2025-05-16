@@ -16,7 +16,7 @@ public class BreakoutApplication {
 
     @GetMapping("/")
     public String home(Model model) {
-        model.addAttribute("message", "This is Breakout GAME APP!");
+        model.addAttribute("message", "This is Breakout, it is GAME APP!");
         return "index";
     }
 }
