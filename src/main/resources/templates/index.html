@@ -9,14 +9,54 @@
             text-align: center;
             padding-top: 80px;
         }
-        img {
-            width: 200px;
-            margin-top: 20px;
+        .game-form {
+            display: inline-block;
+            text-align: left;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        .difficulty label {
+            display: block;
+            margin: 6px 0;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        .start-button {
+            margin-top: 10px;
+            padding: 10px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .start-button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <h1 th:text="${message}">Placeholder</h1>
-    <img src="https://media.giphy.com/media/xT0GqeSlGSRQut4YKs/giphy.gif" alt="Happy GIF">
+    <form class="game-form" action="/start" method="post">
+        <label for="name"><strong>Enter your name:</strong></label>
+        <input type="text" id="name" name="name" required>
+
+        <p><strong>Select difficulty:</strong></p>
+        <div class="difficulty">
+            <label><input type="radio" name="difficulty" value="Easy" required> Easy</label>
+            <label><input type="radio" name="difficulty" value="Medium"> Medium</label>
+            <label><input type="radio" name="difficulty" value="Hard"> Hard</label>
+            <label><input type="radio" name="difficulty" value="Masochist"> Masochist</label>
+        </div>
+
+        <button class="start-button" type="submit">Start Game</button>
+    </form>
 </body>
 </html>

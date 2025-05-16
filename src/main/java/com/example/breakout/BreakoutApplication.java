@@ -3,7 +3,7 @@ package com.example.breakout;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
 
 @SpringBootApplication
@@ -15,8 +15,16 @@ public class BreakoutApplication {
     }
 
     @GetMapping("/")
-    public String home(Model model) {
-        model.addAttribute("message", "This is Breakout, it is GAME APP!");
+    public String home() {
         return "index";
+    }
+
+    @PostMapping("/start")
+    public String startGame(@RequestParam String name,
+                            @RequestParam String difficulty,
+                            Model model) {
+        System.out.println("Player: " + name + ", Difficulty: " + difficulty);
+        model.addAttribute("message", "Welcome " + name + "! You selected: " + difficulty);
+        return "game";
     }
 }
