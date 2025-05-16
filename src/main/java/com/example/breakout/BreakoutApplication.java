@@ -24,7 +24,13 @@ public class BreakoutApplication {
                             @RequestParam String difficulty,
                             Model model) {
         System.out.println("Player: " + name + ", Difficulty: " + difficulty);
-        model.addAttribute("message", "Welcome " + name + "! You selected: " + difficulty);
+        String txt = "";
+        if (difficulty == "Easy") {
+        	txt = "You are a chicken!";
+        } else if (difficulty == "Masochist") {
+        	txt = "You must be mental!";
+        }
+        model.addAttribute("message", "Welcome " + name + "! You selected " + difficulty + " difficulty. " + txt);
         return "game";
     }
 }
