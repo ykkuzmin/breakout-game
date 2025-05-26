@@ -2,10 +2,120 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Breakout Game - Start</title>
+    <style>
+        body {
+            background-color: #000;
+            font-family: sans-serif;
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding-top: 20px;
+        }
+
+        canvas {
+            display: block;
+            margin: 20px auto;
+            background: #fff;
+        }
+
+        a {
+            color: #00ffcc;
+            text-decoration: none;
+            font-size: 18px;
+        }
+    </style>
 </head>
-<body style="text-align: center; font-family: sans-serif; padding-top: 80px;">
+<body>
     <h1 th:text="${message}">Starting game...</h1>
     <p>Good luck, have fun!</p>
-	<a href="/">Go Home</a>
+
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <a href="/">Go Home</a>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Platform settings
+        const platform = {
+            width: 120,
+            height: 20,
+            x: canvas.width / 2 - 60,
+            y: canvas.height - 30,
+            dx: 5
+        };
+		
+		const ball = {
+			radius: 10,
+			x: canvas.width / 2 - 60,
+			y: 20,
+			speed: 5,
+			vector_x: 1,
+			vector_y: 2
+		}
+
+        let rightPressed = false;
+
+        // handling when key pressed
+		document.addEventListener("keydown", (e) => {
+            if (e.code === "ArrowRight") rightPressed = true;
+        });
+
+        // handling when key released
+		document.addEventListener("keyup", (e) => {
+            if (e.code === "ArrowRight") rightPressed = false;
+        });
+
+        function drawPlatform() {
+			// draws platform on coordinates
+            ctx.beginPath();
+            ctx.rect(platform.x, platform.y, platform.width, platform.height);
+            ctx.fillStyle = "#00ff44";
+            ctx.fill();
+            ctx.closePath();
+        }
+		
+		function drawBall() {
+			// draws ball on coordinates and with a given radius
+			ctx.beginPath();
+			ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+			ctx.fillStyle = "#00ff44";
+			ctx.fill();
+			ctx.closePath();
+		}
+
+        function update() {
+			// this is where the main game happens -> update coordinates, handle collision, and other
+            // platform coordinates update
+			// if right key pressed and platform is not going outside - keep updating it's x coordinate
+			if (rightPressed && platform.x + platform.width < canvas.width) {
+                platform.x += platform.dx;
+            }
+			// ball coordinates update
+			// collision with the platform should be handled here
+			// for now add just a fall until it hits the edge of the canvas
+			if (ball.y + ball.vector_y < canvas.height && ball.y + ball.vector_y > 0 && ball.x + ball.vector_x > 0 && ball.x + ball.vector_x < canvas.width) {
+				ball.x = ball.x + ball.vector_x;
+				ball.y = ball.y + ball.vector_y;
+			}
+        }
+
+        function clearCanvas() {
+			// as the name states - cleans the whole canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function gameLoop() {
+			// this is main infinite loop
+            clearCanvas();
+            drawPlatform();
+			drawBall();
+            update(); // main logic will be in this function
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop(); // this is like main method in Java
+    </script>
 </body>
 </html>
