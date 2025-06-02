@@ -56,15 +56,18 @@
 		}
 
         let rightPressed = false;
+		let leftPressed = false;
 
-        // handling when key pressed
+        // handling when right/left key pressed
 		document.addEventListener("keydown", (e) => {
             if (e.code === "ArrowRight") rightPressed = true;
+			if (e.code === "ArrowLeft") leftPressed = true;
         });
 
-        // handling when key released
+        // handling when right/left key released
 		document.addEventListener("keyup", (e) => {
             if (e.code === "ArrowRight") rightPressed = false;
+			if (e.code === "ArrowLeft") leftPressed = false;
         });
 
         function drawPlatform() {
@@ -88,16 +91,62 @@
         function update() {
 			// this is where the main game happens -> update coordinates, handle collision, and other
             // platform coordinates update
-			// if right key pressed and platform is not going outside - keep updating it's x coordinate
+			// if right key pressed and platform is not going outside - keep updating its x coordinate
 			if (rightPressed && platform.x + platform.width < canvas.width) {
                 platform.x += platform.dx;
             }
+			// if left key pressed and platform is not going outside - keep updating its x coordinate
+			if (leftPressed && platform.x > 0) {
+			    platform.x -= platform.dx;
+			}
 			// ball coordinates update
-			// collision with the platform should be handled here
+			// collision with the bottom should be handled here
 			// for now add just a fall until it hits the edge of the canvas
-			if (ball.y + ball.vector_y < canvas.height && ball.y + ball.vector_y > 0 && ball.x + ball.vector_x > 0 && ball.x + ball.vector_x < canvas.width) {
+			
+			// ceiling reflection
+			if (ball.y - ball.radius <= 0 && ball.x + ball.radius >= 0 && ball.x + ball.radius <= canvas.width)
+			{
+				ball.vector_y *= -1;
+				console.log("ceiling reflection");
+				//alert("ceiling reflection " + ball.vector_y);
+			}
+			
+			// right wall reflection
+			if (ball.x + ball.radius == canvas.width && 0 <= ball.y + ball.radius <= canvas.height)
+			{
+				ball.vector_x *= -1;
+				console.log("right wall reflection");
+			}
+	
+			// left wall reflection
+			if (ball.x - ball.radius == 0 && ball.y + ball.radius >= 0 && ball.y + ball.radius <= canvas.height)
+			{
+				ball.vector_x *= -1;
+				console.log("left wall reflection");
+			}
+			
+			// checking collision with right platform
+			if (ball.y + ball.radius == platform.y && ball.x + ball.radius >= platform.x + platform.width / 2 && ball.x + ball.radius <= platform.x + platform.width) {
+				ball.vector_y *= -1;
+				console.log("right side of platform reflection");
+			}
+			
+			// checking collision with left platform
+			if (ball.y + ball.radius == platform.y && ball.x + ball.radius >= platform.x && ball.x + ball.radius < platform.x + platform.width / 2) {
+				ball.vector_y *= -1;
+				console.log("left side of platform reflection");
+			}
+			
+			if (ball.y + ball.vector_y < canvas.height && ball.y + ball.vector_y >= 0 && ball.x + ball.vector_x > 0 && ball.x + ball.vector_x < canvas.width) {
 				ball.x = ball.x + ball.vector_x;
 				ball.y = ball.y + ball.vector_y;
+				console.log("normal path");
+			}
+			
+			if (ball.y + ball.radius > canvas.height) {
+				ctx.font = "50px Arial";
+				ctx.fillStyle = "#FF0000";
+				ctx.fillText("GAME OVER", 250, 300);
 			}
         }
 
@@ -112,6 +161,10 @@
             drawPlatform();
 			drawBall();
             update(); // main logic will be in this function
+			console.log("ball.x: " + ball.x);
+			console.log("ball.y: " + ball.y);
+			console.log("ball.vector_x: " + ball.vector_x);
+			console.log("ball.vector_y: " + ball.vector_y);
             requestAnimationFrame(gameLoop);
         }
 
