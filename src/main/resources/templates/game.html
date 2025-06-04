@@ -46,15 +46,27 @@
             dx: 5
         };
 		
+		const modelBrick = {
+			height: 25,
+			width: 75,
+			color: "#FFD700",
+			rows: 2,
+			cols: 8,
+			init_x: 15,
+			init_y: 25,
+			gap_x: 100,
+			gap_y: 50
+		}
+
 		const ball = {
 			radius: 10,
 			x: canvas.width / 2 - 60,
-			y: 20,
+			y: 150,
 			speed: 5,
 			vector_x: 1,
 			vector_y: 2
 		}
-
+		
         let rightPressed = false;
 		let leftPressed = false;
 
@@ -69,7 +81,64 @@
             if (e.code === "ArrowRight") rightPressed = false;
 			if (e.code === "ArrowLeft") leftPressed = false;
         });
+		
+		
+		function create2DEmptyArray(rows, cols) 
+		{
+			let arr = new Array(rows);
+			for (let i = 0; i < rows; i++)
+			{
+				arr[i] = new Array(cols);
+			}
+			return arr;
+		}
+		
+		let bricks = create2DEmptyArray(modelBrick.rows, modelBrick.cols);
+		
+		for (let i = 0; i < bricks.length; i++)
+		{
+			for (let j = 0; j < bricks[i].length; j++)
+			{
+				bricks[i][j] = {
+					x: modelBrick.init_x + modelBrick.gap_x*j, 
+					y: modelBrick.init_y + modelBrick.gap_y*i,
+					visible: true
+				}
+			}
+		}
+		
+		function drawBricks()
+		{
+			for (let i = 0; i < bricks.length; i++)
+			{
+				for (let j = 0; j < bricks[i].length; j++)
+				{
+					if (bricks[i][j].visible)
+					{
+						ctx.beginPath();
+						ctx.rect(bricks[i][j].x, bricks[i][j].y, modelBrick.width, modelBrick.height);
+						ctx.fillStyle = modelBrick.color;
+						ctx.fill();
+						ctx.closePath();
+					}
+				}
+			}
+		}
+		
+		function ballHitsBrick(ball, brick) {
+		    // Find the closest point on the rectangle to the center of the circle
+		    const closestX = Math.max(brick.x, Math.min(ball.x, brick.x + modelBrick.width));
+		    const closestY = Math.max(brick.y, Math.min(ball.y, brick.y + modelBrick.height));
 
+		    // Calculate the distance from the circle's center to this point
+		    const dx = ball.x - closestX;
+		    const dy = ball.y - closestY;
+
+		    // If the distance is less than or equal to the radius, collision
+		    return (dx * dx + dy * dy) <= (ball.radius * ball.radius);
+		}
+		
+		
         function drawPlatform() {
 			// draws platform on coordinates
             ctx.beginPath();
@@ -148,6 +217,22 @@
 				ctx.fillStyle = "#FF0000";
 				ctx.fillText("GAME OVER", 250, 300);
 			}
+			
+			for (let i = 0; i < bricks.length; i++)
+			{
+				for (let j = 0; j < bricks[i].length; j++)
+				{
+					if (bricks[i][j].visible)
+					{
+						if (ballHitsBrick(ball, bricks[i][j]))
+						{
+							bricks[i][j].visible = false;
+							ball.vector_y *= -1;
+						}
+					}
+				}
+			}
+			
         }
 
         function clearCanvas() {
@@ -160,11 +245,8 @@
             clearCanvas();
             drawPlatform();
 			drawBall();
+			drawBricks();
             update(); // main logic will be in this function
-			console.log("ball.x: " + ball.x);
-			console.log("ball.y: " + ball.y);
-			console.log("ball.vector_x: " + ball.vector_x);
-			console.log("ball.vector_y: " + ball.vector_y);
             requestAnimationFrame(gameLoop);
         }
 
