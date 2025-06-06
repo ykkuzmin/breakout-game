@@ -28,6 +28,7 @@
 <body>
     <h1 th:text="${message}">Starting game...</h1>
     <p>Good luck, have fun!</p>
+	<p>Score: <div id="scorePlace">0</div></p>
 
     <canvas id="gameCanvas" width="800" height="600"></canvas>
 
@@ -58,17 +59,26 @@
 			gap_y: 50
 		}
 
-		const ball = {
+		let ball = {
 			radius: 10,
 			x: canvas.width / 2 - 60,
 			y: 150,
-			speed: 5,
-			vector_x: 1,
-			vector_y: 2
+			vector_x: 2,
+			vector_y: 3
+		}
+		
+		const initBall = {
+			radius: ball.radius,
+			x: ball.x,
+			y: ball.y,
+			vector_x: ball.vector_x,
+			vector_y: ball.vector_y
 		}
 		
         let rightPressed = false;
 		let leftPressed = false;
+		let collisionCount = 0;
+		let scoreCounter = 0;
 
         // handling when right/left key pressed
 		document.addEventListener("keydown", (e) => {
@@ -156,6 +166,13 @@
 			ctx.fill();
 			ctx.closePath();
 		}
+		
+		function printScore() {
+			ctx.font = "15px Arial";
+			ctx.fillStyle = "#FF0000";
+			ctx.fillText("Score: " + scoreCounter, 15, 15);
+			document.getElementById("scorePlace").innerHTML = scoreCounter;
+		}
 
         function update() {
 			// this is where the main game happens -> update coordinates, handle collision, and other
@@ -195,13 +212,13 @@
 			}
 			
 			// checking collision with right platform
-			if (ball.y + ball.radius == platform.y && ball.x + ball.radius >= platform.x + platform.width / 2 && ball.x + ball.radius <= platform.x + platform.width) {
+			if (ball.y + ball.radius >= platform.y && ball.x + ball.radius >= platform.x + platform.width / 2 && ball.x + ball.radius <= platform.x + platform.width) {
 				ball.vector_y *= -1;
 				console.log("right side of platform reflection");
 			}
 			
 			// checking collision with left platform
-			if (ball.y + ball.radius == platform.y && ball.x + ball.radius >= platform.x && ball.x + ball.radius < platform.x + platform.width / 2) {
+			if (ball.y + ball.radius >= platform.y && ball.x + ball.radius >= platform.x && ball.x + ball.radius < platform.x + platform.width / 2) {
 				ball.vector_y *= -1;
 				console.log("left side of platform reflection");
 			}
@@ -209,13 +226,13 @@
 			if (ball.y + ball.vector_y < canvas.height && ball.y + ball.vector_y >= 0 && ball.x + ball.vector_x > 0 && ball.x + ball.vector_x < canvas.width) {
 				ball.x = ball.x + ball.vector_x;
 				ball.y = ball.y + ball.vector_y;
-				console.log("normal path");
 			}
 			
 			if (ball.y + ball.radius > canvas.height) {
 				ctx.font = "50px Arial";
 				ctx.fillStyle = "#FF0000";
 				ctx.fillText("GAME OVER", 250, 300);
+				return "exit";
 			}
 			
 			for (let i = 0; i < bricks.length; i++)
@@ -228,11 +245,28 @@
 						{
 							bricks[i][j].visible = false;
 							ball.vector_y *= -1;
+							collisionCount += 1;
+							scoreCounter += 10;
 						}
 					}
 				}
 			}
 			
+			if (collisionCount == (modelBrick.rows * modelBrick.cols))
+			{
+				collisionCount = 0;
+				
+				for (let i = 0; i < bricks.length; i++)
+				{
+					for (let j = 0; j < bricks[i].length; j++)
+					{
+						bricks[i][j].visible = true;
+					}
+				}
+				
+				ball = initBall;
+			}
+			return "continue";
         }
 
         function clearCanvas() {
@@ -246,8 +280,14 @@
             drawPlatform();
 			drawBall();
 			drawBricks();
-            update(); // main logic will be in this function
+			printScore();
+            let result = update(); // main logic will be in this function
+			if (result == "exit")
+			{
+				return;
+			}
             requestAnimationFrame(gameLoop);
+			console.log("Number of bricks hit: ", collisionCount);
         }
 
         gameLoop(); // this is like main method in Java
