@@ -28,14 +28,19 @@
 <body>
     <h1 th:text="${message}">Starting game...</h1>
     <p>Good luck, have fun!</p>
-	<p>Score: <div id="scorePlace">0</div></p>
+	<p>Score: <span id="scorePlace">0</span></p>
+	<span id="difficultyLevel" th:text="${level}" style="display:none;">Here should be level</span>
 
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <canvas id="gameCanvas"></canvas>
 
     <a href="/">Go Home</a>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
+		
+		canvas.width = window.innerWidth * 0.5;
+		canvas.height = window.innerHeight * 0.6;
+
         const ctx = canvas.getContext('2d');
 
         // Platform settings
@@ -47,22 +52,60 @@
             dx: 5
         };
 		
-		const modelBrick = {
-			height: 25,
-			width: 75,
-			color: "#FFD700",
-			rows: 2,
-			cols: 8,
-			init_x: 15,
-			init_y: 25,
-			gap_x: 100,
-			gap_y: 50
+		let level = document.getElementById('difficultyLevel').innerHTML;
+		
+		let rows = 0;
+		let cols = 0;
+		let height = 25;
+		let width = 0;
+		let init_x = 15;
+		let init_y = 25;
+		let gap_x = 0;
+		let gap_y = 25;
+		
+		if (level == "Easy")
+		{
+			rows = 1;
+			cols = 5;
 		}
-
+		
+		if (level == "Medium")
+		{
+			rows = 1;
+			cols = 10;
+		}
+		
+		if (level == "Hard")
+		{
+			rows = 2;
+			cols = 10;
+		}
+		
+		if (level == "Masochist")
+		{
+			rows = 3;
+			cols = 15;
+		}
+		
+		width = ((canvas.width - init_x)/cols) * 0.9;
+		gap_x = ((canvas.width - init_x)/cols) * 0.1;
+		
+		const modelBrick = {
+			height: height,
+			width: width,
+			color: "#FFD700",
+			rows: rows,
+			cols: cols,
+			init_x: init_x,
+			init_y: init_y,
+			gap_x: gap_x,
+			gap_y: gap_y
+		}
+		
 		let ball = {
 			radius: 10,
 			x: canvas.width / 2 - 60,
-			y: 150,
+			y: 30 + modelBrick.init_y + (modelBrick.height + modelBrick.gap_y)*modelBrick.rows,
 			vector_x: 2,
 			vector_y: 3
 		}
@@ -110,8 +153,8 @@
 			for (let j = 0; j < bricks[i].length; j++)
 			{
 				bricks[i][j] = {
-					x: modelBrick.init_x + modelBrick.gap_x*j, 
-					y: modelBrick.init_y + modelBrick.gap_y*i,
+					x: modelBrick.init_x + (modelBrick.width + modelBrick.gap_x)*j, 
+					y: modelBrick.init_y + (modelBrick.height + modelBrick.gap_y)*i,
 					visible: true
 				}
 			}
@@ -193,7 +236,6 @@
 			if (ball.y - ball.radius <= 0 && ball.x + ball.radius >= 0 && ball.x + ball.radius <= canvas.width)
 			{
 				ball.vector_y *= -1;
-				console.log("ceiling reflection");
 				//alert("ceiling reflection " + ball.vector_y);
 			}
 			
@@ -201,26 +243,22 @@
 			if (ball.x + ball.radius == canvas.width && 0 <= ball.y + ball.radius <= canvas.height)
 			{
 				ball.vector_x *= -1;
-				console.log("right wall reflection");
 			}
 	
 			// left wall reflection
 			if (ball.x - ball.radius == 0 && ball.y + ball.radius >= 0 && ball.y + ball.radius <= canvas.height)
 			{
 				ball.vector_x *= -1;
-				console.log("left wall reflection");
 			}
 			
 			// checking collision with right platform
 			if (ball.y + ball.radius >= platform.y && ball.x + ball.radius >= platform.x + platform.width / 2 && ball.x + ball.radius <= platform.x + platform.width) {
 				ball.vector_y *= -1;
-				console.log("right side of platform reflection");
 			}
 			
 			// checking collision with left platform
 			if (ball.y + ball.radius >= platform.y && ball.x + ball.radius >= platform.x && ball.x + ball.radius < platform.x + platform.width / 2) {
 				ball.vector_y *= -1;
-				console.log("left side of platform reflection");
 			}
 			
 			if (ball.y + ball.vector_y < canvas.height && ball.y + ball.vector_y >= 0 && ball.x + ball.vector_x > 0 && ball.x + ball.vector_x < canvas.width) {
@@ -231,7 +269,7 @@
 			if (ball.y + ball.radius > canvas.height) {
 				ctx.font = "50px Arial";
 				ctx.fillStyle = "#FF0000";
-				ctx.fillText("GAME OVER", 250, 300);
+				ctx.fillText("GAME OVER", canvas.width/2 - 150, canvas.height/2);
 				return "exit";
 			}
 			
@@ -287,7 +325,6 @@
 				return;
 			}
             requestAnimationFrame(gameLoop);
-			console.log("Number of bricks hit: ", collisionCount);
         }
 
         gameLoop(); // this is like main method in Java
