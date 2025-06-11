@@ -30,6 +30,8 @@
     <p>Good luck, have fun!</p>
 	<p>Score: <span id="scorePlace">0</span></p>
 	<span id="difficultyLevel" th:text="${level}" style="display:none;">Here should be level</span>
+	<span id="ballColor" th:text="${ballColor}" style="display:none;">Here should be ballColor</span>
+	<span id="platformColor" th:text="${platformColor}" style="display:none;">Here should be platformColor</span>
 
     <canvas id="gameCanvas"></canvas>
 
@@ -53,6 +55,8 @@
         };
 		
 		let level = document.getElementById('difficultyLevel').innerHTML;
+		let ballColor = document.getElementById('ballColor').innerHTML;
+		let platformColor = document.getElementById('platformColor').innerHTML;
 		
 		let rows = 0;
 		let cols = 0;
@@ -62,30 +66,40 @@
 		let init_y = 25;
 		let gap_x = 0;
 		let gap_y = 25;
+		let min_vector_x = 0;
+		let max_vector_x = 0;
 		
 		if (level == "Easy")
 		{
 			rows = 1;
 			cols = 5;
+			min_vector_x = -3;
 		}
 		
 		if (level == "Medium")
 		{
 			rows = 1;
 			cols = 10;
+			min_vector_x = -5;
 		}
 		
 		if (level == "Hard")
 		{
 			rows = 2;
 			cols = 10;
+			min_vector_x = -10;
+			platform.dx = 7;
 		}
 		
 		if (level == "Masochist")
 		{
 			rows = 3;
 			cols = 15;
+			min_vector_x = -15;
+			platform.dx = 10;
 		}
+		
+		max_vector_x = -1 * min_vector_x;
 		
 		width = ((canvas.width - init_x)/cols) * 0.9;
 		gap_x = ((canvas.width - init_x)/cols) * 0.1;
@@ -196,7 +210,7 @@
 			// draws platform on coordinates
             ctx.beginPath();
             ctx.rect(platform.x, platform.y, platform.width, platform.height);
-            ctx.fillStyle = "#00ff44";
+            ctx.fillStyle = platformColor;
             ctx.fill();
             ctx.closePath();
         }
@@ -205,15 +219,12 @@
 			// draws ball on coordinates and with a given radius
 			ctx.beginPath();
 			ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
-			ctx.fillStyle = "#00ff44";
+			ctx.fillStyle = ballColor;
 			ctx.fill();
 			ctx.closePath();
 		}
 		
 		function printScore() {
-			ctx.font = "15px Arial";
-			ctx.fillStyle = "#FF0000";
-			ctx.fillText("Score: " + scoreCounter, 15, 15);
 			document.getElementById("scorePlace").innerHTML = scoreCounter;
 		}
 
@@ -240,31 +251,63 @@
 			}
 			
 			// right wall reflection
-			if (ball.x + ball.radius == canvas.width && 0 <= ball.y + ball.radius <= canvas.height)
+			if (ball.x + ball.radius > canvas.width && 0 <= ball.y + ball.radius <= canvas.height)
 			{
 				ball.vector_x *= -1;
 			}
 	
 			// left wall reflection
-			if (ball.x - ball.radius == 0 && ball.y + ball.radius >= 0 && ball.y + ball.radius <= canvas.height)
+			if (ball.x - ball.radius < 0 && ball.y + ball.radius >= 0 && ball.y + ball.radius <= canvas.height)
 			{
 				ball.vector_x *= -1;
 			}
 			
-			// checking collision with right platform
-			if (ball.y + ball.radius >= platform.y && ball.x + ball.radius >= platform.x + platform.width / 2 && ball.x + ball.radius <= platform.x + platform.width) {
-				ball.vector_y *= -1;
+			// checking center collision
+			if (
+			    ball.y + ball.radius >= platform.y &&
+				ball.x + ball.radius >= platform.x + platform.width / 2 - 10 &&
+				ball.x + ball.radius <= platform.x + platform.width / 2 + 10
+			) {
+			  // Center hit — apply random horizontal bounce
+			  	ball.vector_y *= -1;
+			  	ball.vector_x = Math.floor(Math.random() * (max_vector_x - min_vector_x + 1)) - max_vector_x;
+				console.log("Center was hit");
+				console.log(ball.vector_x);
+			} else if (
+				 ball.y + ball.radius >= platform.y &&
+				 ball.x + ball.radius >= platform.x + platform.width / 2 &&
+				 ball.x + ball.radius <= platform.x + platform.width
+			) {
+			  // Right half
+			  	ball.vector_y *= -1;
+				if (level == "Masochist")
+				{
+					ball.vector_x = Math.abs(ball.vector_x) + Math.floor(Math.random() * (21)) - 10;
+				}
+				else {
+					ball.vector_x = Math.abs(ball.vector_x);
+				}
+			  	
+				console.log("Right half was hit");
+				console.log(ball.vector_x);
+			} else if (
+			  	ball.y + ball.radius >= platform.y &&
+			  	ball.x + ball.radius >= platform.x &&
+			  	ball.x + ball.radius < platform.x + platform.width / 2
+			) {
+			  // Left half
+			  	ball.vector_y *= -1;
+			  	ball.vector_x = -Math.abs(ball.vector_x);
+				console.log("Left half was hit");
+				console.log(ball.vector_x);
 			}
-			
-			// checking collision with left platform
-			if (ball.y + ball.radius >= platform.y && ball.x + ball.radius >= platform.x && ball.x + ball.radius < platform.x + platform.width / 2) {
-				ball.vector_y *= -1;
-			}
-			
-			if (ball.y + ball.vector_y < canvas.height && ball.y + ball.vector_y >= 0 && ball.x + ball.vector_x > 0 && ball.x + ball.vector_x < canvas.width) {
+
+		
+			//if (ball.y + ball.vector_y < canvas.height && ball.y + ball.vector_y >= 0 && ball.x + ball.vector_x > 0 && ball.x + ball.vector_x < canvas.width) {
 				ball.x = ball.x + ball.vector_x;
 				ball.y = ball.y + ball.vector_y;
-			}
+				console.log("Ball.x: " + ball.x);
+			//}
 			
 			if (ball.y + ball.radius > canvas.height) {
 				ctx.font = "50px Arial";

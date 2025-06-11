@@ -22,11 +22,15 @@ public class BreakoutApplication {
     @PostMapping("/start")
     public String startGame(@RequestParam String name,
                             @RequestParam String difficulty,
+                            @RequestParam String ballColor,
+                            @RequestParam String platformColor,
                             Model model) {
         System.out.println("Player: " + name + ", Difficulty: " + difficulty);
         String txt = CallingNames.response(name, difficulty);
         model.addAttribute("message", txt);
         model.addAttribute("level", difficulty);
+        model.addAttribute("ballColor", ballColor);
+        model.addAttribute("platformColor", platformColor);
         return "game";
     }
 }

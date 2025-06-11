@@ -22,7 +22,7 @@
             margin: 6px 0;
         }
         input[type="text"] {
-            width: 100%;
+            width: 95%;
             padding: 10px;
             margin-bottom: 12px;
             border-radius: 6px;
@@ -34,6 +34,7 @@
             font-size: 16px;
             border-radius: 8px;
             background-color: #4CAF50;
+			width: 100%;
             color: white;
             border: none;
             cursor: pointer;
@@ -55,9 +56,15 @@
             <label><input type="radio" name="difficulty" value="Hard"> Hard</label>
             <label><input type="radio" name="difficulty" value="Masochist"> Masochist</label>
         </div>
-
+		
+		<label for="ballColor"><strong>Pick ball color:</strong></label>
+		<input type="color" id="ballColor" name="ballColor" value="#ff0000">
+		
+		<label for="platformColor"><strong>Pick platform color:</strong></label>
+		<input type="color" id="platformColor" name="platformColor" value="#ff0000">
+		
         <button class="start-button" type="submit">Start Game</button>
     </form>
-	<p>Version: 0.1.1</p>
+	<p>Version: 0.2.0</p>
 </body>
 </html>
