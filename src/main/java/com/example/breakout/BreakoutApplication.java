@@ -26,6 +26,7 @@ public class BreakoutApplication {
                             @RequestParam String platformColor,
                             Model model) {
         System.out.println("Player: " + name + ", Difficulty: " + difficulty);
+        name = name.isEmpty() ? name : Character.toUpperCase(name.charAt(0)) + name.substring(1);
         String txt = CallingNames.response(name, difficulty);
         model.addAttribute("message", txt);
         model.addAttribute("level", difficulty);
